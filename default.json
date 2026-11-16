@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "The fleet's shared Renovate preset (danhon/reverse-proxy#7). Each repo's renovate.json extends github>danhon/renovate-config.",
-    "Public so public repos can extend it too. How it fits the patch policy: reverse-proxy docs-site/docs/host/patching.md, 'Renovate'; rules IMG-1 and IMG-2 on its conventions page."
+    "Public so public repos can extend it too. How it fits the patch policy: reverse-proxy docs-site/docs/host/patching.md, 'Renovate'; rules IMG-1 and IMG-2 (every release waits 3 days) on its conventions page."
   ],
   "extends": [
     "config:recommended"
@@ -72,14 +72,6 @@
         "minor"
       ],
       "groupName": null
-    },
-    {
-      "description": "IMG-2: build tools wait two weeks",
-      "matchDepNames": [
-        "ghcr.io/astral-sh/uv",
-        "uv"
-      ],
-      "minimumReleaseAge": "14 days"
     },
     {
       "description": "Traefik and Authelia (reverse-proxy#4): their own PR as soon as a release is 3 days old, never grouped or automerged. Merging changes the pin; patch-edge-update.py deploys it",
