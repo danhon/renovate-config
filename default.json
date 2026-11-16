@@ -1,0 +1,103 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "The fleet's shared Renovate preset (danhon/reverse-proxy#7). Each repo's renovate.json extends github>danhon/renovate-config.",
+    "Public so public repos can extend it too. How it fits the patch policy: reverse-proxy docs-site/docs/host/patching.md, 'Renovate'; rules IMG-1 and IMG-2 on its conventions page."
+  ],
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "America/Los_Angeles",
+  "automerge": false,
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "schedule": [
+    "* 0-5 1 * *"
+  ],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "minimumReleaseAge": null,
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": false,
+    "labels": [
+      "security"
+    ]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "* 0-5 1 * *"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "The monthly feature batch: every non-major update in one PR, opened early on the 1st, before the patch-monthly reminder at 09:00",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "groupName": "monthly batch",
+      "groupSlug": "monthly-batch"
+    },
+    {
+      "description": "IMG-1: an image a compose file runs as it comes is pinned to version@digest",
+      "matchManagers": [
+        "docker-compose"
+      ],
+      "pinDigests": true
+    },
+    {
+      "description": "IMG-1: a Dockerfile FROM keeps a version tag without a digest, so patch-rebuild picks up the base image's security fixes within 7 or 30 days",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "pinDigests": false
+    },
+    {
+      "description": "A new Python or Node minor in a FROM is a runtime upgrade (3.12 to 3.13), not a patch: its own PR, still monthly",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchDepNames": [
+        "python",
+        "node"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": null
+    },
+    {
+      "description": "IMG-2: build tools wait two weeks",
+      "matchDepNames": [
+        "ghcr.io/astral-sh/uv",
+        "uv"
+      ],
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Traefik and Authelia (reverse-proxy#4): their own PR as soon as a release is 3 days old, never grouped or automerged. Merging changes the pin; patch-edge-update.py deploys it",
+      "matchDepNames": [
+        "traefik",
+        "authelia/authelia"
+      ],
+      "groupName": null,
+      "schedule": [
+        "at any time"
+      ],
+      "automerge": false,
+      "labels": [
+        "edge"
+      ],
+      "prBodyNotes": [
+        "**Edge image: don't `docker compose up` this.** After merging, on ubuntuplex in a quiet hour: `git -C ~/dev/reverse-proxy pull`, then `scripts/patch-edge-update.py {{#if (equals depName 'traefik')}}traefik{{else}}authelia{{/if}}`, which probes the routes and rolls back by itself. If it rolls back, revert this PR's commit. Runbook: docs-site/docs/host/patching.md."
+      ]
+    }
+  ]
+}
